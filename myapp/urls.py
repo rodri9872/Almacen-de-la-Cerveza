@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from .views import RegistroView  # Importar la vista basada en clases
 urlpatterns = [
     path ('', views.index, name='articulos'),
-    path ('listar_articulos', views.listar_articulos, name='listar_articulos'),
+    path ('listar_articulos/', views.listar_articulos, name='listar_articulos'),
     path('articulos/crear/', views.crear_articulo, name='crear_articulo'),
     path ('mesas', views.mesas, name='listar_mesas'),
     path('alta_mesa', views.insertar_mesa, name='alta_mesas'),
