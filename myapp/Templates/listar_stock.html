@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Stocks</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Estilos personalizados -->
+    <style>
+        .stock-bajo {
+            background-color: #ffcccc; /* Fondo rojo para stock bajo */
+        }
+    </style>
+</head>
+<!-- Barra de navegación -->
+{% extends 'index.html' %}
+
+{% block content %}
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center">Listado de Stocks</h1>
+
+        <!-- Tabla de stocks -->
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Artículo</th>
+                    <th>Cantidad</th>
+                    <th>Mínimo de Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr class="{% if stock.cantidad < stock.minimo_stock %}stock-bajo{% endif %}">
+                    <td>{{ stock.articulo.nombre }}</td>
+                    <td>{{ stock.cantidad }}</td>
+                    <td>{{ stock.minimo_stock }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if stock.activo %}bg-success
+                            {% else %}bg-danger
+                            {% endif %}">
+                            {% if stock.activo %}Activo{% else %}Inactivo{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <!-- Botón para abrir el modal de modificación -->
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modificarStockModal{{ stock.id }}">
+                            Modificar
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+   <!-- Modales para modificar stocks -->
+{% for stock in stocks %}
+<div class="modal fade" id="modificarStockModal{{ stock.id }}" tabindex="-1" aria-labelledby="modificarStockModalLabel{{ stock.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modificarStockModalLabel{{ stock.id }}">Modificar Stock de {{ stock.articulo.nombre }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'modificar_stock' stock.id %}">
+                    {% csrf_token %}
+                    <!-- Renderizar el formulario manualmente -->
+                    <div class="mb-3">
+                        <label for="cantidad{{ stock.id }}" class="form-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad{{ stock.id }}" name="cantidad" value="{{ stock.cantidad }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="minimo_stock{{ stock.id }}" class="form-label">Mínimo de Stock</label>
+                        <input type="number" class="form-control" id="minimo_stock{{ stock.id }}" name="minimo_stock" value="{{ stock.minimo_stock }}" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="activo{{ stock.id }}" name="activo" {% if stock.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo{{ stock.id }}">Activo</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+{% endblock %}
+</html>

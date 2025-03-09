@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cervecería</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <!-- Estilos personalizados -->
+    <style>
+        /* Div de la imagen a la izquierda */
+        #imagenArticulo {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 300px; /* Ancho del div */
+            height: 100vh; /* Altura completa de la pantalla */
+            background-color: #f8f9fa; /* Color de fondo */
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Asegura que esté por encima de otros elementos */
+        }
+
+        /* Imagen del artículo */
+        #imagenArticulo img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Información del artículo */
+        #infoArticulo {
+            margin-top: 20px;
+        }
+
+        /* Ajustar el contenido principal para que no se solape con el div de la imagen */
+        body {
+            margin-left: 320px; /* Deja espacio para el div de la imagen */
+        }
+    </style>
+</head>
+<body>
+    <!-- Div para la imagen del artículo seleccionado -->
+    <div id="imagenArticulo">
+        <img id="imagenArticuloSeleccionado" src="" alt="Imagen del artículo" style="display: none;">
+        <div id="infoArticulo">
+            <h4 id="nombreArticulo"></h4>
+            <p id="marcaArticulo"></p>
+            <p id="precioArticulo"></p>
+        </div>
+    </div>
+
+    <h1 style="text-align: center;">Almacén de la Cerveza</h1>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Navegación</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/admin">Admin</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          Stock
+                        </a>
+                        <ul class="dropdown-menu">
+                          <li><a class="nav-link" href="/"> Articulos</a></li>
+                          <li><a class="dropdown-item" href="/stocks">Stock</a></li>
+                        </ul>
+                      </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/listar_pedidos">Pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/registro">Registrar Usuario</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          Mesas
+                        </a>
+                        <ul class="dropdown-menu">
+                          <li><a class="nav-link" href="/mesas"> Ver Mesas</a></li>
+                          <li><a class="dropdown-item" href="sectores">Sectores</a></li>
+                        </ul>
+                      </li>
+                </ul>
+                <div class="d-flex">
+                    {% if user.is_authenticated %}
+                        <span class="navbar-text">Bienvenido, {{ user.username }}</span>
+                        <a href="{% url 'inicio_sesion' %}" class="btn btn-outline-light">Cerrar sesión</a>
+                    {% else %}
+                        <a href="{% url 'inicio_sesion' %}" class="btn btn-outline-light">Iniciar sesión</a>
+                        <a href="{% url 'registro' %}" class="btn btn-outline-light ms-2">Registrarse</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
+    <div class="container mt-4">
+        <!-- Formulario de filtrado por estado vigente -->
+        <form method="get" action="{% url 'listar_articulos' %}" class="mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="vigente" class="form-label">Filtrar por estado:</label>
+                    <select name="vigente" id="vigente" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="True" {% if request.GET.vigente == 'True' %}selected{% endif %}>Vigente</option>
+                        <option value="False" {% if request.GET.vigente == 'False' %}selected{% endif %}>No Vigente</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Tabla con artículos -->
+        <table id="miTabla" class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Marca</th>
+                    <th scope="col">Precio</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for articulo in articulo %}
+                <tr>
+                    <th scope="row">{{ articulo.id }}</th>
+                    <td>{{ articulo.nombre }}</td>
+                    <td>{{ articulo.marca }}</td>
+                    <td>{{ articulo.precio }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if articulo.vigente %}bg-success
+                            {% else %}bg-danger
+                            {% endif %}">
+                            {% if articulo.vigente %}Vigente{% else %}No Vigente{% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <!-- Botón para modificar -->
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalModificar{{ articulo.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                            </svg>
+                            Modificar
+                        </button>
+                        <!-- Botón para seleccionar el artículo -->
+                        <button type="button" class="btn btn-info btn-seleccionar" data-id="{{ articulo.id }}" data-nombre="{{ articulo.nombre }}" data-marca="{{ articulo.marca }}" data-precio="{{ articulo.precio }}" data-vigente="{{ articulo.vigente }}" 
+                          {% if articulo.imagen %} 
+                              data-imagen="{{ articulo.imagen.url }}"
+                          {% else %}
+                              data-imagen=""
+                          {% endif %}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                            </svg>
+                            Seleccionar
+                        </button>
+
+                       
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+         <!-- Botón para abrir el modal de creación de artículos -->
+         <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#crearArticuloModal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+            </svg>
+            Crear Artículo
+        </button>
+    </div>
+
+    <!-- Modal para crear un nuevo artículo -->
+    <div class="modal fade" id="crearArticuloModal" tabindex="-1" aria-labelledby="crearArticuloModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{% url 'crear_articulo' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="crearArticuloModalLabel">Crear Nuevo Artículo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Campo Nombre -->
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                        <!-- Campo Marca -->
+                        <div class="mb-3">
+                            <label for="marca" class="form-label">Marca</label>
+                            <input type="text" class="form-control" id="marca" name="marca" required>
+                        </div>
+                        <!-- Campo Precio -->
+                        <div class="mb-3">
+                            <label for="precio" class="form-label">Precio</label>
+                            <input type="number" step="0.01" class="form-control" id="precio" name="precio" required>
+                        </div>
+                        <!-- Campo Imagen -->
+                        <div class="mb-3">
+                            <label for="imagen" class="form-label">Imagen</label>
+                            <input type="file" class="form-control" id="imagen" name="imagen">
+                        </div>
+                        <!-- Campo Vigente -->
+                        <div class="mb-3">
+                            <label for="vigente" class="form-label">Vigente</label>
+                            <select class="form-select" id="vigente" name="vigente">
+                                <option value="True">Vigente</option>
+                                <option value="False">No Vigente</option>
+                            </select>
+                        </div>
+                        <!-- Campo Cantidad Inicial -->
+                        <div class="mb-3">
+                            <label for="cantidad_inicial" class="form-label">Cantidad Inicial</label>
+                            <input type="number" class="form-control" id="cantidad_inicial" name="cantidad_inicial" value="0" required>
+                        </div>
+                        <!-- Campo Mínimo de Stock -->
+                        <div class="mb-3">
+                            <label for="minimo_stock" class="form-label">Mínimo de Stock</label>
+                            <input type="number" class="form-control" id="minimo_stock" name="minimo_stock" value="10" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+   <!-- Modales para modificar artículos -->
+    {% for articulo in articulo %}
+    <div class="modal fade" id="modalModificar{{ articulo.id }}" tabindex="-1" aria-labelledby="modalModificarLabel{{ articulo.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Agregar enctype="multipart/form-data" -->
+                <form method="POST" action="{% url 'modificar_articulo' articulo.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalModificarLabel{{ articulo.id }}">Modificar Artículo {{ articulo.nombre }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Campo Descripción -->
+                        <div class="mb-3">
+                            <label for="descripcion{{ articulo.id }}" class="form-label">Descripción</label>
+                            <input type="text" class="form-control" id="descripcion{{ articulo.id }}" name="nombre" value="{{ articulo.nombre }}" required>
+                        </div>
+                        <!-- Campo Marca -->
+                        <div class="mb-3">
+                            <label for="marca{{ articulo.id }}" class="form-label">Marca</label>
+                            <input type="text" class="form-control" id="marca{{ articulo.id }}" name="marca" value="{{ articulo.marca }}" required>
+                        </div>
+                        <!-- Campo Precio -->
+                        <div class="mb-3">
+                            <label for="precio{{ articulo.id }}" class="form-label">Precio</label>
+                            <input type="text" class="form-control" id="precio{{ articulo.id }}" name="precio" value="{{ articulo.precio }}" required>
+                        </div>
+                        <!-- Campo Imagen -->
+                        <div class="mb-3">
+                            <label for="imagen{{ articulo.id }}" class="form-label">Imagen</label>
+                            <input type="file" class="form-control" id="imagen{{ articulo.id }}" name="imagen">
+                            {% if articulo.imagen %}
+                                <small class="text-muted">Imagen actual: <a href="{{ articulo.imagen.url }}" target="_blank">{{ articulo.imagen.name }}</a></small>
+                            {% else %}
+                                <small class="text-muted">No hay imagen cargada.</small>
+                            {% endif %}
+                        </div>
+                        <!-- Campo Vigente -->
+                        <div class="mb-3">
+                            <label for="vigente{{ articulo.id }}" class="form-label">Vigente</label>
+                            <select class="form-select" id="vigente{{ articulo.id }}" name="vigente">
+                                <option value="True" {% if articulo.vigente %}selected{% endif %}>Vigente</option>
+                                <option value="False" {% if not articulo.vigente %}selected{% endif %}>No Vigente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        // Inicializar DataTable
+        $(document).ready(function() {
+            $('#miTabla').DataTable({
+                caseInsensitive: false,
+                smart: true,
+                exact: false,
+                searching: true,     // Activa la búsqueda
+                ordering: true,      // Activa la ordenación de columnas
+                order: [[1, 'asc']], // Ordena por la segunda columna de forma ascendente por defecto
+                pageLength: 5,       // Número de registros por página
+                lengthMenu: [5, 10, 25, 50, 100] // Opciones de cantidad de registros por página
+            });
+        });
+
+        document.querySelectorAll('.btn-seleccionar').forEach(button => {
+            button.addEventListener('click', () => {
+                const nombre = button.getAttribute('data-nombre');
+                const marca = button.getAttribute('data-marca');
+                const precio = button.getAttribute('data-precio');
+                const imagen = button.getAttribute('data-imagen');
+
+                // Obtener elementos del DOM
+                const imgElement = document.getElementById('imagenArticuloSeleccionado');
+                const nombreElement = document.getElementById('nombreArticulo');
+                const marcaElement = document.getElementById('marcaArticulo');
+                const precioElement = document.getElementById('precioArticulo');
+
+                // Actualizar la imagen si existe
+                if (imagen) {
+                    imgElement.src = imagen;
+                    imgElement.style.display = 'block';
+                } else {
+                    imgElement.style.display = 'none'; // Ocultar la imagen
+                }
+
+                // Actualizar la información del artículo
+                nombreElement.textContent = nombre;
+                marcaElement.textContent = `Marca: ${marca}`;
+                precioElement.textContent = `Precio: $${precio}`;
+            });
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

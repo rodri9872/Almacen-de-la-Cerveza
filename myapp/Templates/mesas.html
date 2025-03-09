@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cervecería</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    {% extends 'index.html' %}
+    
+{% block content %}
+
+    <!-- Tabla de mesas -->
+    <div class="container mt-4">
+        <table id="miTabla" class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Número</th>
+                    <th scope="col">Sector</th>
+                    <th scope="col">Vigente</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mesa in mesas %}
+                <tr>
+                    <th scope="row">{{ mesa.id }}</th>
+                    <td>{{ mesa.numero_mesa }}</td>
+                    <td>{{ mesa.id_sector.nombre }}</td>
+                    <td>{{ mesa.vigente }}</td>
+                    <td>
+                        <!-- Botón para modificar -->
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalModificar{{ mesa.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                            </svg>
+                            Modificar
+                        </button>
+
+                        <!-- Botón para mostrar el QR -->
+                        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#qrModal{{ mesa.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-qr-code" viewBox="0 0 16 16">
+                                <path d="M2 2h2v2H2z"/>
+                                <path d="M6 0v6H0V0zM5 1H1v4h4zM4 12H2v2h2z"/>
+                                <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z"/>
+                                <path d="M10 0v6h6V0zm5 1v4h-4V1zM8 1V0h1v2H8v2H7V1zm0 5V4h1v2zM6 8V7h1V6h1v2h1V7h5v1h-4v1H7V8zm0 0v1H2V8H1v1H0V7h3v1zm10 1h-1V7h1zm-1 0h-1v2h2v-1h-1zm-4 0h2v1h-1v1h-1zm2 3v-1h-1v1h-1v1H9v1h3v-2zm0 0h3v1h-2v1h-1zm-4-1v1h1v-2H7v1z"/>
+                                <path d="M7 12h1v3h4v1H7zm9 2v2h-3v-1h2v-1z"/>
+                            </svg>
+                            QR
+                        </button>
+
+                        <!-- Modal para mostrar el QR -->
+                        <div class="modal fade" id="qrModal{{ mesa.id }}" tabindex="-1" aria-labelledby="qrModalLabel{{ mesa.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="qrModalLabel{{ mesa.id }}">Código QR - Mesa {{ mesa.numero_mesa }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        {% if mesa.qr_codigo %}
+                                            <img src="{{ mesa.qr_codigo.url }}" alt="Código QR de la Mesa {{ mesa.numero_mesa }}" class="img-fluid" id="qrImage{{ mesa.id }}">
+                                        {% else %}
+                                            <p>No se generó un código QR para esta mesa.</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <!-- Botón para descargar el QR -->
+                                        <a href="{{ mesa.qr_codigo.url }}" download="qr_mesa_{{ mesa.numero_mesa }}.png" class="btn btn-success">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                                                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                                            </svg>
+                                            Descargar QR
+                                        </a>
+                                        <!-- Botón para imprimir el QR -->
+                                        <button type="button" class="btn btn-primary" onclick="imprimirQR('qrImage{{ mesa.id }}')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                                                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/>
+                                                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm10 7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h1v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6h1a1 1 0 0 1 1 1z"/>
+                                            </svg>
+                                            Imprimir QR
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal para modificar la mesa -->
+                        <div class="modal fade" id="modalModificar{{ mesa.id }}" tabindex="-1" aria-labelledby="modalModificarLabel{{ mesa.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{% url 'modificar_mesa' mesa.id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalModificarLabel{{ mesa.id }}">Modificar Mesa {{ mesa.numero_mesa }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Campo Número de Mesa -->
+                                            <div class="mb-3">
+                                                <label for="numeroMesa{{ mesa.id }}" class="form-label">Número de Mesa</label>
+                                                <input type="text" class="form-control" id="numeroMesa{{ mesa.id }}" name="numero_mesa" value="{{ mesa.numero_mesa }}" required>
+                                            </div>
+
+                                            <!-- Checkbox Vigente -->
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="checkbox" id="vigente{{ mesa.id }}" name="vigente" {% if mesa.vigente %}checked{% endif %}>
+                                                <label class="form-check-label" for="vigente{{ mesa.id }}">Vigente</label>
+                                            </div>
+
+                                            <!-- Selección de Sector -->
+                                            <div class="mb-3">
+                                                <label for="sector{{ mesa.id }}" class="form-label">Sector</label>
+                                                <select class="form-select" id="sector{{ mesa.id }}" name="id_sector" required>
+                                                    {% for sector in sectores %}
+                                                    <option value="{{ sector.id }}" {% if sector.id == mesa.id_sector.id %}selected{% endif %}>{{ sector.nombre }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botones para agregar y eliminar mesas -->
+    <div class="container mt-4">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalMesa">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+            </svg>
+            Agregar Mesa
+        </button>
+
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalMesaborrar">
+            Eliminar
+        </button>
+    </div>
+
+    <!-- Modal para eliminar mesa -->
+    <div class="modal fade" id="modalMesaborrar" tabindex="-1" aria-labelledby="modalMesaborrarLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{% url 'baja_mesas' %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title">Seleccione Mesa a Borrar</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="mesa" class="form-label">Mesas</label>
+                            <select class="form-select" id="mesa" name="id_mesa" required>
+                                {% for mesa in mesas %}
+                                <option value="{{ mesa.id }}">Mesa número: {{ mesa.numero_mesa }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-danger">Borrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar mesa -->
+    <div class="modal fade" id="modalMesa" tabindex="-1" aria-labelledby="modalMesaLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{% url 'alta_mesas' %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title">Agregar Mesa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="numeroMesa" class="form-label">Número de Mesa</label>
+                            <input type="text" class="form-control" id="numeroMesa" name="numero_mesa" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="vigente" name="vigente">
+                            <label class="form-check-label" for="vigente">Vigente</label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sector" class="form-label">Sector</label>
+                            <select class="form-select" id="sector" name="id_sector" required>
+                                {% for sector in sectores %}
+                                <option value="{{ sector.id }}">{{ sector.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Mesa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#miTabla').DataTable();
+        });
+    </script>
+
+    <script>
+        // Función para imprimir el QR
+        function imprimirQR(imageId) {
+            const qrImage = document.getElementById(imageId);
+            if (qrImage) {
+                const ventanaImpresion = window.open('', '_blank');
+                ventanaImpresion.document.write(`
+                    <html>
+                        <head>
+                            <title>Imprimir QR</title>
+                            <style>
+                                body { text-align: center; }
+                                img { max-width: 100%; height: auto; }
+                            </style>
+                        </head>
+                        <body>
+                            <img src="${qrImage.src}" alt="Código QR">
+                        </body>
+                    </html>
+                `);
+                ventanaImpresion.document.close();
+                ventanaImpresion.print();
+            } else {
+                alert('No se encontró el código QR.');
+            }
+        }
+    </script>
+{% endblock %}
+
+</body>
+</html>
