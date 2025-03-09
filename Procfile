@@ -1,1 +1,1 @@
-web: gunicorn cerveceria.wsgi:application
+web: gunicorn cerveceria.wsgi:application --bind 0.0.0.0:$PORT
