@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-
+import dj_database_url
+from django.core.management.utils import get_random_secret_key
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +28,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-cdq-%&p8^e!2@@9-8bmkr$tf5n%w55@ofp(6&y9#eiv^4hkqi!'
+SECRET_KEY = os.getenv('SECRET_KEY', default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -49,8 +50,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    #'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,17 +87,10 @@ WSGI_APPLICATION = 'cerveceria.wsgi.application'
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cerveceria_abai',            # Nombre de la base de datos
-        'USER': 'cerveceria_user',       # Usuario de la base de datos
-        'PASSWORD': 'UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b',     # Contraseña de la base de datos
-        'HOST': 'dpg-cv71rsd2ng1s738ga3og-a.oregon-postgres.render.com',               # Host de la base de datos
-        'PORT': '5432',                  # Puerto de la base de datos
-        'OPTIONS': {
-            'sslmode': 'require',  # O 'disable' si no necesitas SSL
-        },
-    }
+    'default': dj_database_url.config(
+        default='postgresql://cerveceria_user:UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b@dpg-cv71rsd2ng1s738ga3og-a:5432/cerveceria_abai',
+        conn_max_age=600
+    )
 }
 
 
@@ -135,12 +129,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'    
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
