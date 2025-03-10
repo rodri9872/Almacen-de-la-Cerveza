@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-from .models import articulos, Mesas, Sector, Pedido, DetallePedido, Stock
+from .models import Articulos, Mesas, Sector, Pedido, DetallePedido, Stock  # Cambiado a Articulos
 from .forms import SectorForm, StockForm, ArticuloForm, RegistroForm
 import json
 from openpyxl import Workbook
@@ -12,18 +12,18 @@ from openpyxl import Workbook
 
 # Vistas para Artículos
 def index(request):
-    articulos_list = articulos.objects.all()  # Obtener todos los artículos
+    articulos_list = Articulos.objects.all()  # Cambiado a Articulos
     return render(request, 'index.html', {'articulos': articulos_list})
 
 
 def listar_articulos(request):
     vigente_seleccionado = request.GET.get('vigente', '')
     if vigente_seleccionado == 'True':
-        articulos_list = articulos.objects.filter(vigente=True)
+        articulos_list = Articulos.objects.filter(vigente=True)  # Cambiado a Articulos
     elif vigente_seleccionado == 'False':
-        articulos_list = articulos.objects.filter(vigente=False)
+        articulos_list = Articulos.objects.filter(vigente=False)  # Cambiado a Articulos
     else:
-        articulos_list = articulos.objects.all()
+        articulos_list = Articulos.objects.all()  # Cambiado a Articulos
     return render(request, 'index.html', {
         'articulos': articulos_list,
         'vigente_seleccionado': vigente_seleccionado
@@ -49,7 +49,7 @@ def crear_articulo(request):
 
 
 def modificar_articulo(request, articulo_id):
-    articulo = get_object_or_404(articulos, id=articulo_id)
+    articulo = get_object_or_404(Articulos, id=articulo_id)  # Cambiado a Articulos
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         marca = request.POST.get('marca')
@@ -146,7 +146,7 @@ def crear_pedido(request):
             )
 
             for articulo_id, item in carrito_data.items():
-                articulo = articulos.objects.get(id=articulo_id)
+                articulo = Articulos.objects.get(id=articulo_id)  # Cambiado a Articulos
                 DetallePedido.objects.create(
                     pedido=pedido,
                     articulo=articulo,
@@ -320,8 +320,9 @@ def cerrar_sesion(request):
     logout(request)
     return redirect('inicio_sesion')
 
+
 def pagina(request):
-    articulo = articulos.objects.all()  # Obtener todos los artículos
+    articulo = Articulos.objects.all()  # Cambiado a Articulos
     return render(request, 'pagina_articulos.html', {
         'articulo': articulo  # Pasar los datos consultados, no el modelo
     })

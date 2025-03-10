@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models  import articulos, Mesas, Sector, Pedido, DetallePedido, Stock
+from .models  import Articulos, Mesas, Sector, Pedido, DetallePedido, Stock
 
-admin.site.register(articulos)
+admin.site.register(Articulos)
 admin.site.register(Mesas)
 admin.site.register(Sector)
 

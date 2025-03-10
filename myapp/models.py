@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Modelo para los artículos
-class articulos(models.Model):
+class Articulos(models.Model):
     nombre = models.CharField(max_length=200)
     marca = models.CharField(max_length=200, default='')
     precio = models.DecimalField(max_digits=100, decimal_places=2, default=0.0)
@@ -67,7 +67,7 @@ class DetallePedido(models.Model):
         related_name='detalles'
     )
     articulo = models.ForeignKey(
-        articulos,
+        Articulos,
         on_delete=models.CASCADE,
         related_name='detalles_pedido'
     )
@@ -85,7 +85,7 @@ class DetallePedido(models.Model):
 # Modelo para el stock de los artículos
 class Stock(models.Model):
     articulo = models.OneToOneField(
-        articulos,
+        Articulos,
         on_delete=models.CASCADE,
         related_name='stock',
         verbose_name='Artículo'

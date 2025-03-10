@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'cerveceria.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:postgres@localhost:5432/mysite',
+        default='postgresql://cerveceria_user:UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b@dpg-cv71rsd2ng1s738ga3og-a.oregon-postgres.render.com:5432/cerveceria_abai?sslmode=require',
         conn_max_age=600
     )
 }

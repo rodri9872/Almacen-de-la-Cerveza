@@ -1,5 +1,5 @@
 from django import forms
-from .models import Sector, Stock, articulos, PerfilUsuario
+from .models import Sector, Stock, Articulos, PerfilUsuario
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -40,7 +40,7 @@ class ArticuloForm(forms.ModelForm):
     )
 
     class Meta:
-        model = articulos
+        model = Articulos
         fields = ['nombre', 'marca', 'precio', 'imagen', 'cantidad_inicial', 'minimo_stock']
 
 class RegistroForm(UserCreationForm):
