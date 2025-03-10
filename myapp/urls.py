@@ -27,7 +27,7 @@ urlpatterns = [
     path('stocks/', views.listar_stocks, name='listar_stock'),
     path('stocks/modificar/<int:stock_id>', views.modificar_stock, name='modificar_stock'),
     path('pedidos/exportar', views.exportar_pedidos_excel, name='exportar_pedidos_excel'),
-    path('documento_prueba'),
+    path('documento_prueba', views.listar_stocks, name='documento'),
 
 
     
