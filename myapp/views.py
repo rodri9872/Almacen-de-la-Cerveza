@@ -236,7 +236,7 @@ def menu(request):
 
 def cerrar_sesion(request):
     logout(request)
-    return redirect('nombre_de_la_url_inicio')  # Redirigir a la página de inicio
+    return redirect('iniciar-sesion/')  # Redirigir a la página de inicio
 
 
 
