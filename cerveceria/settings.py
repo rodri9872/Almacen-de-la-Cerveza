@@ -93,6 +93,9 @@ DATABASES = {
         'PASSWORD': 'UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b',     # Contraseña de la base de datos
         'HOST': 'dpg-cv71rsd2ng1s738ga3og-a.oregon-postgres.render.com',               # Host de la base de datos
         'PORT': '5432',                  # Puerto de la base de datos
+        'OPTIONS': {
+            'sslmode': 'require',  # O 'disable' si no necesitas SSL
+        },
     }
 }
 
