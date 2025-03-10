@@ -54,7 +54,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    #'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'cerveceria.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://cerveceria_user:UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b@dpg-cv71rsd2ng1s738ga3og-a.oregon-postgres.render.com:5432/cerveceria_abai',
+        default='postgresql://cerveceria_user:UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b@dpg-cv71rsd2ng1s738ga3og-a.oregon-postgres.render.com:5432/cerveceria_abai?sslmode=require',
         conn_max_age=600
     )
 }
@@ -135,7 +135,7 @@ STATIC_URL = 'static/'
 
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    #STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'    
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'    
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
