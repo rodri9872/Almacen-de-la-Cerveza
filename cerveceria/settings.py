@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-cdq-%&p8^e!2@@9-8bmkr$tf5n%w55@ofp(6&y9#eiv^4hkqi!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']  # Permite todos los dominios (solo para pruebas)
+ALLOWED_HOSTS = ['almacen-de-la-cerveza-1.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -136,7 +136,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
