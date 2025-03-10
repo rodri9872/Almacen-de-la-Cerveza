@@ -319,3 +319,9 @@ def inicio_sesion(request):
 def cerrar_sesion(request):
     logout(request)
     return redirect('inicio_sesion')
+
+def pagina(request):
+    articulo = articulos.objects.all()  # Obtener todos los artículos
+    return render(request, 'pagina_articulos.html', {
+        'articulo': articulo  # Pasar los datos consultados, no el modelo
+    })
