@@ -86,6 +86,16 @@
                         </span>
                     </td>
                     <td>
+                        <!-- Botón para imprimir el comprobante en HTML -->
+                        <a href="{% url 'comprobante_pedido' pedido.id %}" class="btn btn-sm btn-info" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/>
+                                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm10 7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h10zm-1 5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1h8z"/>
+                            </svg>
+                            Imprimir
+                        </a>
+                    </td>
+                    <td>
                         <form method="post" action="{% url 'cambiar_estado_pedido' pedido.id %}" style="display:inline;">
                             {% csrf_token %}
                             <select name="estado" class="form-select" onchange="if(confirm('¿Estás seguro de cambiar el estado del pedido?')) { this.form.submit(); }">
@@ -96,13 +106,14 @@
                         </form>
                     </td>
                     <td>
-                        <ul>
-                            {% for detalle in pedido.detalles.all %}
-                            <li>
-                                {{ detalle.articulo.nombre }} - Cantidad: {{ detalle.cantidad }} - Precio Unitario: ${{ detalle.precio_unitario }} - Precio Final: ${{ detalle.precio_final }}
-                            </li>
-                            {% endfor %}
-                        </ul>
+                    <button class="btn btn-sm btn-primary ver-detalles" 
+                        data-pedido-id="{{ pedido.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                        </svg>
+                        Ver Detalles
+                    </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -110,8 +121,62 @@
         </table>
     </div>
 
+    <!-- Modal para detalles del pedido -->
+    <div class="modal fade" id="detallePedidoModal" tabindex="-1" aria-labelledby="detallePedidoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detallePedidoModalLabel">Detalles del Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="detallePedidoLista"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Script para manejar el modal de detalles -->
+    <script>
+            document.addEventListener('DOMContentLoaded', function() {
+            const verDetallesButtons = document.querySelectorAll('.ver-detalles');
+            const detallePedidoLista = document.getElementById('detallePedidoLista');
+
+            verDetallesButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const pedidoId = this.getAttribute('data-pedido-id');
+
+                    // Limpiar la lista de detalles
+                    detallePedidoLista.innerHTML = '';
+
+                    // Hacer una solicitud AJAX para obtener los detalles del pedido
+                    fetch(`/obtener_detalles_pedido/${pedidoId}/`)
+                        .then(response => response.json())
+                        .then(detalles => {
+                            // Mostrar los detalles en el modal
+                            detalles.forEach(detalle => {
+                                const li = document.createElement('li');
+                                li.textContent = `${detalle.articulo__nombre} - Cantidad: ${detalle.cantidad} - Precio Unitario: $${detalle.precio_unitario} - Precio Final: $${detalle.precio_final}`;
+                                detallePedidoLista.appendChild(li);
+                            });
+
+                            // Abrir el modal
+                            const modal = new bootstrap.Modal(document.getElementById('detallePedidoModal'));
+                            modal.show();
+                        })
+                        .catch(error => {
+                            console.error("Error al obtener los detalles del pedido:", error);
+                        });
+                });
+            });
+        });
+    </script>
 </body>
 {% endblock %}
 </html>

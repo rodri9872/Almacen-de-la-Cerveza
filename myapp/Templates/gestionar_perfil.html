@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil_usuario</title>
+</head>
+<!-- Barra de navegación -->
+{% extends 'index.html' %}
+
+{% block content %}
+<body>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Gestionar Perfil</h2>
+
+    <!-- Mostrar mensajes de éxito o error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulario para editar el perfil -->
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_telefono" class="form-label">Teléfono</label>
+                    {{ form.telefono }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_direccion" class="form-label">Dirección</label>
+                    {{ form.direccion }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                    {{ form.fecha_nacimiento }}
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mostrar información actual del perfil -->
+    <div class="card shadow mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Información Actual</h5>
+            <p class="card-text"><strong>Usuario:</strong> {{ perfil.usuario.username }}</p>
+            <p class="card-text"><strong>Teléfono:</strong> {{ perfil.telefono|default:"No proporcionado" }}</p>
+            <p class="card-text"><strong>Dirección:</strong> {{ perfil.direccion|default:"No proporcionada" }}</p>
+            <p class="card-text"><strong>Fecha de Nacimiento:</strong> {{ perfil.fecha_nacimiento|default:"No proporcionada" }}</p>
+        </div>
+    </div>
+</div>
+
+    
+</body>
+{% endblock %}
+</html>
+
+

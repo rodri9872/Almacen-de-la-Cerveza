@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-import dj_database_url
+# import dj_database_url
 from django.core.management.utils import get_random_secret_key
 
 
@@ -34,6 +34,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', default=get_random_secret_key())
 DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
+
+LOGIN_URL = 'inicio_sesion'  # Nombre de la URL de inicio de sesión
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -90,11 +92,18 @@ WSGI_APPLICATION = 'cerveceria.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default='postgresql://cerveceria_user:UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b@dpg-cv71rsd2ng1s738ga3og-a.oregon-postgres.render.com:5432/cerveceria_abai?sslmode=require',
+#         conn_max_age=600
+#     )
+# }
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://cerveceria_user:UXZXSiitcIr2lE6JM9QwfhkIVBZLqr6b@dpg-cv71rsd2ng1s738ga3og-a.oregon-postgres.render.com:5432/cerveceria_abai?sslmode=require',
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 
@@ -134,10 +143,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
-# Whitenoise configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+ 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

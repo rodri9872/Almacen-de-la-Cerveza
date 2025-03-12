@@ -67,46 +67,14 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
+                        
 
                         <form method="POST">
                             {% csrf_token %}
                             
-                            <!-- Campo: Nombre de usuario -->
-                            <div class="mb-3">
-                                <label for="id_username" class="form-label">Nombre de usuario</label>
-                                <input type="text" name="username" class="form-control" id="id_username" required>
-                            </div>
-
-                            <!-- Campo: Correo electrónico -->
-                            <div class="mb-3">
-                                <label for="id_email" class="form-label">Correo electrónico</label>
-                                <input type="email" name="email" class="form-control" id="id_email" required>
-                            </div>
-
-                            <!-- Campo: Nombre -->
-                            <div class="mb-3">
-                                <label for="id_first_name" class="form-label">Nombre</label>
-                                <input type="text" name="first_name" class="form-control" id="id_first_name" required>
-                            </div>
-
-                            <!-- Campo: Apellido -->
-                            <div class="mb-3">
-                                <label for="id_last_name" class="form-label">Apellido</label>
-                                <input type="text" name="last_name" class="form-control" id="id_last_name" required>
-                            </div>
-
-                            <!-- Campo: Contraseña -->
-                            <div class="mb-3">
-                                <label for="id_password1" class="form-label">Contraseña</label>
-                                <input type="password" name="password1" class="form-control" id="id_password1" required>
-                            </div>
-
-                            <!-- Campo: Confirmar contraseña -->
-                            <div class="mb-3">
-                                <label for="id_password2" class="form-label">Confirmar contraseña</label>
-                                <input type="password" name="password2" class="form-control" id="id_password2" required>
-                            </div>
-
+                            <!-- Mostrar el formulario de Django -->
+                            {{ form.as_p }}
+                        
                             <!-- Botón de registro -->
                             <button type="submit" class="btn btn-primary">Registrarse</button>
                         </form>

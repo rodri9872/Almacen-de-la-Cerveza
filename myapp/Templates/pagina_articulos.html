@@ -42,6 +42,20 @@
     </style>
 </head>
 <body>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <!-- <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Pedido confirmado correctamente.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div> -->
     <header class="mb-4">
         <h1 class="text-center py-4 bg-dark text-white">Almacén de la Cerveza</h1>
     </header>
@@ -67,7 +81,7 @@
 
     <!-- Contenedor de Artículos -->
     <main class="contenedor-articulos">
-        {% for articulo in articulo %}
+        {% for articulo in articulos %}
         <div class="card card-articulo">
             {% if articulo.imagen %}
             <img src="{{ articulo.imagen.url }}" class="card-img-top" alt="{{ articulo.nombre }}">
@@ -79,12 +93,13 @@
                 <p class="card-text">Código: {{ articulo.id }}</p>
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="text-primary">${{ articulo.precio }}</h4>
-                    <button type="button" class="btn btn-success add-to-cart" 
-                            data-nombre="{{ articulo.nombre }}" 
-                            data-precio="{{ articulo.precio }}"
-                            data-id="{{ articulo.id }}">
-                        +
-                    </button>
+                <button type="button" class="btn btn-success add-to-cart" 
+                    data-nombre="{{ articulo.nombre }}" 
+                    data-precio="{{ articulo.precio }}"
+                    data-id="{{ articulo.id }}"
+                    data-stock="{{ articulo.stock.cantidad }}">
+                    +
+                </button>
                 </div>
             </div>
         </div>
@@ -98,22 +113,21 @@
                 <form id="pedido-form" method="POST" action="{% url 'crear_pedidos' %}">
                     {% csrf_token %}
                     <input type="hidden" id="carrito-data" name="carrito_data">
+                    <!-- Campo oculto para el ID de la mesa -->
+                    <input type="hidden" id="id_mesa" name="id_mesa" value="{{ mesa.id }}">
+                    
                     <div class="modal-header">
                         <h5 class="modal-title">Detalle del Pedido</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     
                     <div class="modal-body">
+                        <!-- Mostrar el número de mesa -->
                         <div class="mb-4">
-                            <label for="id_mesa" class="form-label">Número de Mesa</label>
-                            <select class="form-select" id="id_mesa" name="id_mesa" required>
-                                <option value="" selected disabled>Seleccione una mesa</option>
-                                {% for mesa in mesas %}
-                                <option value="{{ mesa.id }}">{{ mesa.numero_mesa }}</option>
-                                {% endfor %}
-                            </select>
+                            <label class="form-label">Número de Mesa:</label>
+                            <span class="fw-bold">{{ mesa.numero_mesa }}</span>
                         </div>
-                        
+                
                         <div class="mb-4">
                             <h5>Artículos Seleccionados:</h5>
                             <ol id="carrito-lista" class="list-group list-group-numbered">
@@ -129,8 +143,6 @@
                                 <p class="h5">Subtotal: $<span id="subtotal">0.00</span></p>
                             </div>
                         </div>
-
-                        <input type="hidden" id="carrito-data" name="carrito_data">
                     </div>
                     
                     <div class="modal-footer">
@@ -156,8 +168,18 @@
             const id = $(this).data('id');
             const nombre = $(this).data('nombre');
             const precio = parseFloat($(this).data('precio'));
+            const stock = parseInt($(this).data('stock'));
+
+            if (stock <= 0) {
+                alert('Error: No hay suficiente stock para este artículo.');
+                return;
+            }
 
             if (carrito[id]) {
+                if (carrito[id].cantidad >= stock) {
+                    alert('Error: No hay suficiente stock para este artículo.');
+                    return;
+                }
                 carrito[id].cantidad++;
             } else {
                 carrito[id] = { nombre, precio, cantidad: 1 };
@@ -210,16 +232,23 @@
             $('#carrito-data').val(JSON.stringify(carrito));
         }
 
-        // Validación del formulario
         $('#pedido-form').on('submit', function(e) {
-            if (Object.keys(carrito).length === 0) {
-                e.preventDefault();
-                alert('Error: Debe agregar al menos un artículo al carrito');
-            } else if ($('#id_mesa').val() === "") {
-                e.preventDefault();
-                alert('Error: Debe seleccionar una mesa');
-            }
-        });
-    </script>
+        const numeroMesa = $('#id_mesa').val();
+
+        if (Object.keys(carrito).length === 0) {
+            e.preventDefault();
+            alert('Error: Debe agregar al menos un artículo al carrito');
+        } else if (!numeroMesa) {
+            e.preventDefault();
+            alert('Error: No se ha seleccionado una mesa');
+        } else {
+            // Convertir el carrito a JSON y asignarlo al campo oculto
+            $('#carrito-data').val(JSON.stringify(carrito));
+
+            // Cerrar el modal después de enviar el formulario
+            $('#modal_pedido').modal('hide');
+        }
+    });
+</script>
 </body>
 </html>

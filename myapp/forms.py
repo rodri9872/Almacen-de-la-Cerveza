@@ -43,11 +43,26 @@ class ArticuloForm(forms.ModelForm):
         model = Articulos
         fields = ['nombre', 'marca', 'precio', 'imagen', 'cantidad_inicial', 'minimo_stock']
 
-class RegistroForm(UserCreationForm):
+
+class PerfilUsuarioForm(forms.ModelForm):
+    class Meta:
+        model = PerfilUsuario
+        fields = ['telefono', 'direccion', 'fecha_nacimiento']
+        widgets = {
+            'fecha_nacimiento': forms.DateInput(attrs={'type': 'date'}),
+            
+        }
+class RegistroUsuarioForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():  # Verificar si el usuario ya existe
+            raise forms.ValidationError('El nombre de usuario ya está en uso. Por favor, elige otro.')
+        return username

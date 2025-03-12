@@ -28,23 +28,21 @@
 
                 <form method="POST">
                     {% csrf_token %}
+                    
+                    <!-- Campo oculto para el parámetro "next" -->
+                    <input type="hidden" name="next" value="{{ next }}">
+                
                     <div class="mb-3">
                         <label for="username" class="form-label">Nombre de usuario</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Ingresa tu nombre de usuario" required minlength="4">
+                        <input type="text" class="form-control" id="username" name="username" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Contraseña</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Ingresa tu contraseña" required minlength="8">
-                            <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                        
+                        <input type="password" class="form-control" id="password" name="password" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
                 </form>
-                <p class="mt-3">¿No tienes una cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a>.</p>
+                <p class="mt-3">¿No tienes una cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a>.</p> 
             </div>
         </div>
     </div>

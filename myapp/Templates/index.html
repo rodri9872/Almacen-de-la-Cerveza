@@ -40,7 +40,16 @@
             margin-left: 320px; /* Deja espacio para el div de la imagen */
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+
+    <!-- Al final del archivo, antes de cerrar </body> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 </head>
+
+
 <body>
     <!-- Div para la imagen del artículo seleccionado -->
     <div id="imagenArticulo">
@@ -54,42 +63,49 @@
 
     <h1 style="text-align: center;">Almacén de la Cerveza</h1>
 
-    <!-- Barra de navegación -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <!-- Barra de navegación -->
+      <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Navegación</a>
+            <a class="navbar-brand" href="/">Inicio</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Stock
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="nav-link" href="articulos_inicio">Articulos</a></li>
+                            <li><a class="dropdown-item" href="/stocks">Stock</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/admin">Admin</a>
+                        <a class="nav-link" href="/listar_pedido">Pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vista-pedidos-cocina">Vista de Pedido Cocina</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Stock
+                            Usuario
                         </a>
                         <ul class="dropdown-menu">
-                          <li><a class="nav-link" href="/"> Articulos</a></li>
-                          <li><a class="dropdown-item" href="/stocks">Stock</a></li>
+                            <li><a class="nav-link" href="/usuarios">Usuarios</a></li>
+                            <li><a class="nav-link" href="/perfil">Perfil</a></li>
+                            <li><a class="nav-link" href="/registro">Registrar Usuario</a></li>
                         </ul>
-                      </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/listar_pedidos">Pedidos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/registro">Registrar Usuario</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Mesas
+                            Mesas
                         </a>
                         <ul class="dropdown-menu">
-                          <li><a class="nav-link" href="/mesas"> Ver Mesas</a></li>
-                          <li><a class="dropdown-item" href="sectores">Sectores</a></li>
+                            <li><a class="nav-link" href="/mesas">Ver Mesas</a></li>
+                            <li><a class="dropdown-item" href="sectores">Sectores</a></li>
                         </ul>
-                      </li>
+                    </li>
                 </ul>
                 <div class="d-flex">
                     {% if user.is_authenticated %}
@@ -97,7 +113,6 @@
                         <a href="{% url 'inicio_sesion' %}" class="btn btn-outline-light">Cerrar sesión</a>
                     {% else %}
                         <a href="{% url 'inicio_sesion' %}" class="btn btn-outline-light">Iniciar sesión</a>
-                        <a href="{% url 'registro' %}" class="btn btn-outline-light ms-2">Registrarse</a>
                     {% endif %}
                 </div>
             </div>
@@ -136,7 +151,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for articulo in articulo %}
+                {% for articulo in articulos %}
                 <tr>
                     <th scope="row">{{ articulo.id }}</th>
                     <td>{{ articulo.nombre }}</td>
@@ -248,7 +263,7 @@
     </div>
 
    <!-- Modales para modificar artículos -->
-    {% for articulo in articulo %}
+    {% for articulo in articulos %}
     <div class="modal fade" id="modalModificar{{ articulo.id }}" tabindex="-1" aria-labelledby="modalModificarLabel{{ articulo.id }}" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -306,22 +321,41 @@
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+        
+    </script>
     <script>
         // Inicializar DataTable
         $(document).ready(function() {
-            $('#miTabla').DataTable({
-                caseInsensitive: false,
-                smart: true,
-                exact: false,
-                searching: true,     // Activa la búsqueda
-                ordering: true,      // Activa la ordenación de columnas
-                order: [[1, 'asc']], // Ordena por la segunda columna de forma ascendente por defecto
-                pageLength: 5,       // Número de registros por página
-                lengthMenu: [5, 10, 25, 50, 100] // Opciones de cantidad de registros por página
-            });
+        $('#miTabla').DataTable({
+            caseInsensitive: false,
+            smart: true,
+            exact: false,
+            searching: true,     // Activa la búsqueda
+            ordering: true,      // Activa la ordenación de columnas
+            order: [[1, 'asc']], // Ordena por la segunda columna de forma ascendente por defecto
+            pageLength: 5,       // Número de registros por página
+            lengthMenu: [5, 10, 25, 50, 100], // Opciones de cantidad de registros por página
+            dom: 'Bfrtip',      // Define la posición de los botones
+            buttons: [
+                {
+                    extend: 'excel', // Botón para exportar a Excel
+                    text: 'Exportar a Excel', // Texto del botón
+                    className: 'btn btn-success', // Clases de Bootstrap para el botón
+                    filename: 'Lista_de_Articulos', // Nombre personalizado del archivo
+                    exportOptions: {
+                        columns: ':not(:last-child)' // Excluye la última columna (Acciones)
+                    }
+                }
+            ]
         });
+    });
 
         document.querySelectorAll('.btn-seleccionar').forEach(button => {
             button.addEventListener('click', () => {

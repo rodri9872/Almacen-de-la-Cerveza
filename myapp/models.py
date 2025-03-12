@@ -19,7 +19,6 @@ class Sector(models.Model):
     def __str__(self):
         return self.nombre
 
-# Modelo para las mesas
 class Mesas(models.Model):
     numero_mesa = models.IntegerField()
     id_sector = models.ForeignKey(
@@ -29,6 +28,7 @@ class Mesas(models.Model):
     )
     vigente = models.BooleanField(default=True)
     qr_codigo = models.ImageField(upload_to='qrs/', null=True, blank=True)
+    url = models.URLField(blank=True, null=True)  # Nuevo campo para almacenar la URL
 
     def __str__(self):
         return f"Mesa {self.numero_mesa} - Sector: {self.id_sector.nombre}"
@@ -140,9 +140,14 @@ class PerfilUsuario(models.Model):
         null=True,
         verbose_name='Fecha de nacimiento'
     )
+    activo = models.BooleanField(
+        default=True,  # Por defecto, el perfil estará activo
+        verbose_name='¿Está activo?'
+    )
 
     def __str__(self):
         return f"Perfil de {self.usuario.username}"
+    
 
     class Meta:
         verbose_name = 'Perfil de Usuario'

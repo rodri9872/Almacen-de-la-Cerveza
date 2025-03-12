@@ -15,8 +15,8 @@ import qrcode
 def generate_qr_code(sender, instance, created, **kwargs):
     if created:  # Solo generar el QR si es una nueva mesa, no si es una actualización
         # Generar la URL para la mesa
-        base_url = "http://127.0.0.1:8000/admin/myapp/mesas/"  # Cambia esto por la URL base de tu sitio
-        url = f"{base_url}/{instance.id}"  # URL única para la mesa
+        base_url = "http://127.0.0.1:8000/pagina_articulos_inicio"  # Cambia esto por la URL base de tu sitio
+        url = f"{base_url}?mesa={instance.numero_mesa}"  # Incluye el número de mesa como paráme
 
         # Contenido del QR (incluyendo la URL)
         qr_content = f"{url}\nMesa: {instance.numero_mesa}, Sector: {instance.id_sector.nombre}"
@@ -33,6 +33,10 @@ def generate_qr_code(sender, instance, created, **kwargs):
         filename = f"mesa_{instance.numero_mesa}_qr.png"
         instance.qr_codigo.save(filename, File(buffer), save=False)  # No guardamos el modelo aún
 
+        # Guardar la URL en el campo url del modelo
+        instance.url = url
+
         # Guardar los cambios en el modelo sin causar recursión
-        instance.save(update_fields=["qr_codigo"])  # Solo actualizamos el campo qr_codigo
+        instance.save(update_fields=["qr_codigo", "url"])  # Actualizamos ambos campos
+
 
